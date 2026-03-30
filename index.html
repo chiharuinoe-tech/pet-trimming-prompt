@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ペットサロン AI プレビュー調整</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: #f6f7fb;
+            color: #222;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        .page {
+            display: grid;
+            grid-template-columns: 420px 1fr;
+            gap: 20px;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .panel {
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+            padding: 18px;
+        }
+
+        h1 {
+            margin: 0 0 16px;
+            font-size: 24px;
+        }
+
+        h2 {
+            margin: 0 0 12px;
+            font-size: 18px;
+        }
+
+        h3 {
+            margin: 18px 0 10px;
+            font-size: 15px;
+            color: #444;
+        }
+
+        .muted {
+            color: #666;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+        }
+
+        .field {
+            margin-bottom: 12px;
+        }
+
+        .field label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .field input[type="text"],
+        .field select,
+        .field textarea,
+        .field input[type="file"] {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #d7dbe7;
+            border-radius: 10px;
+            background: #fff;
+            font-size: 14px;
+        }
+
+        .field textarea {
+            min-height: 74px;
+            resize: vertical;
+        }
+
+        .hint {
+            margin-top: 4px;
+            font-size: 12px;
+            color: #777;
+            line-height: 1.4;
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .checkbox-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 10px;
+            border: 1px solid #d7dbe7;
+            border-radius: 999px;
+            font-size: 13px;
+            background: #fafbff;
+        }
+
+        details {
+            margin-top: 12px;
+            border: 1px solid #e5e8f1;
+            border-radius: 12px;
+            padding: 10px 12px;
+            background: #fcfcff;
+        }
+
+        details summary {
+            cursor: pointer;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        button {
+            border: none;
+            border-radius: 10px;
+            padding: 12px 16px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .primary {
+            background: #2563eb;
+            color: #fff;
+        }
+
+        .secondary {
+            background: #edf2ff;
+            color: #1d4ed8;
+        }
+
+        .danger {
+            background: #fff1f2;
+            color: #be123c;
+        }
+
+        .preview-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .img-card {
+            background: #fafafa;
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            padding: 10px;
+        }
+
+        .img-card h4 {
+            margin: 0 0 8px;
+            font-size: 13px;
+        }
+
+        .img-box {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            border-radius: 10px;
+            background: #f0f2f6;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #777;
+            font-size: 12px;
+        }
+
+        .img-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: none;
+        }
+
+        .status {
+            margin: 8px 0 16px;
+            padding: 12px 14px;
+            border-radius: 12px;
+            font-size: 14px;
+            line-height: 1.5;
+            background: #f3f4f6;
+            color: #333;
+        }
+
+        .status.loading {
+            background: #eff6ff;
+            color: #1d4ed8;
+        }
+
+        .status.success {
+            background: #ecfdf5;
+            color: #047857;
+        }
+
+        .status.error {
+            background: #fef2f2;
+            color: #b91c1c;
+        }
+
+        .output-box {
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            background: #fff;
+            padding: 14px;
+            margin-bottom: 14px;
+        }
+
+        .output-image {
+            width: 100%;
+            max-height: 560px;
+            object-fit: contain;
+            border-radius: 12px;
+            background: #f6f7fb;
+            border: 1px solid #e5e7eb;
+        }
+
+        pre {
+            white-space: pre-wrap;
+            word-break: break-word;
+            background: #0f172a;
+            color: #e2e8f0;
+            border-radius: 12px;
+            padding: 14px;
+            font-size: 12px;
+            line-height: 1.5;
+            overflow: auto;
+            max-height: 360px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 999px;
+            background: #eef2ff;
+            color: #3730a3;
+            font-size: 12px;
+            font-weight: 700;
+            margin-right: 6px;
+            margin-bottom: 6px;
+        }
+
+        .small {
+            font-size: 12px;
+            color: #666;
+        }
+
+        @media (max-width: 1080px) {
+            .page {
+                grid-template-columns: 1fr;
+            }
+
+            .preview-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .grid-2,
+            .grid-3 {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="protocolWarning"
+        style="display:none; background: #fee2e2; color: #991b1b; padding: 15px; text-align: center; font-weight: bold; border-bottom: 2px solid #ef4444; position: sticky; top: 0; z-index: 9999;">
+        ⚠️ 注意: 現在ファイルを直接開いています。機能を正常に動かすために <a href="http://localhost:3001/index.html"
+            style="color: #1d4ed8; text-decoration: underline;">http://localhost:3001/index.html</a> からアクセスしてください。
+    </div>
+    <script>
+        if (window.location.protocol === 'file:') {
+            document.getElementById('protocolWarning').style.display = 'block';
+        }
+    </script>
+    <div class="page">
+        <div class="panel">
+            <h1>ペットサロン AI プレビュー調整</h1>
+            <div class="muted">
+                選択式を主軸にし、自由入力は補足として使う想定です。<br />
+                送信時は、フォーム値を構造化JSONにまとめてバックエンドへ送ります。
+            </div>
+
+            <form id="groomingForm">
+                <h3>画像入力</h3>
+
+                <div class="field">
+                    <label for="beforeImage">Before画像</label>
+                    <div style="display: flex; gap: 8px;">
+                        <input type="file" id="beforeImage" name="beforeImage" accept="image/*" required />
+                        <button type="button" class="secondary" id="analyzeDogBtn" style="white-space: nowrap; padding: 0 12px; font-size: 12px;">AIで解析</button>
+                    </div>
+                    <div class="hint">個体情報と背景の基準になる画像です。</div>
+                </div>
+
+                <div class="field">
+                    <label for="refImageA">参考画像A</label>
+                    <input type="file" id="refImageA" name="refImageA" accept="image/*" required />
+                    <div class="hint">顔・頭部の参考です。</div>
+                </div>
+
+                <div class="field">
+                    <label for="refImageB">参考画像B</label>
+                    <input type="file" id="refImageB" name="refImageB" accept="image/*" required />
+                    <div class="hint">胴体・脚の参考です。</div>
+                </div>
+
+                <h3>基本設定</h3>
+
+                <div class="grid-2">
+                    <div class="field">
+                        <label for="breedPrimary">主犬種</label>
+                        <input type="text" id="breedPrimary" value="パピヨン" placeholder="例: パピヨン" />
+                    </div>
+                    <div class="field">
+                        <label for="breedSecondary">副犬種</label>
+                        <input type="text" id="breedSecondary" placeholder="例: チワワ" />
+                    </div>
+                </div>
+
+                <div class="grid-3">
+                    <div class="field">
+                        <label for="sizeClass">サイズ</label>
+                        <select id="sizeClass">
+                            <option>未指定</option>
+                            <option>超小型</option>
+                            <option selected>小型</option>
+                            <option>中型</option>
+                            <option>大型</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="ageStage">年齢区分</label>
+                        <select id="ageStage">
+                            <option selected>未指定</option>
+                            <option>子犬</option>
+                            <option>成犬</option>
+                            <option>シニア</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="bodyBuild">体格</label>
+                        <select id="bodyBuild">
+                            <option selected>未指定</option>
+                            <option>華奢</option>
+                            <option>標準</option>
+                            <option>がっしり</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid-3">
+                    <div class="field">
+                        <label for="coatLength">毛の長さ</label>
+                        <select id="coatLength">
+                            <option>未指定</option>
+                            <option>短毛</option>
+                            <option>中毛</option>
+                            <option selected>長毛</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="coatVolume">毛量</label>
+                        <select id="coatVolume">
+                            <option>未指定</option>
+                            <option>少なめ</option>
+                            <option>普通</option>
+                            <option selected>多め</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="coatTexture">毛質</label>
+                        <select id="coatTexture">
+                            <option>未指定</option>
+                            <option>直毛</option>
+                            <option selected>ふんわり</option>
+                            <option>ウェーブ</option>
+                            <option>カーリー</option>
+                            <option>ダブルコート風</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid-3">
+                    <div class="field">
+                        <label for="earType">耳タイプ</label>
+                        <select id="earType">
+                            <option>未指定</option>
+                            <option>立ち耳</option>
+                            <option>垂れ耳</option>
+                            <option>半立ち耳</option>
+                            <option selected>大きめ立ち耳</option>
+                            <option>飾り毛あり</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="tailType">尾タイプ</label>
+                        <select id="tailType">
+                            <option>未指定</option>
+                            <option selected>自然</option>
+                            <option>ふさふさ</option>
+                            <option>巻き尾</option>
+                            <option>垂れ尾</option>
+                            <option>ポンポン向き</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="colorPattern">毛色パターン</label>
+                        <select id="colorPattern">
+                            <option>未指定</option>
+                            <option>単色</option>
+                            <option selected>白茶</option>
+                            <option>黒白</option>
+                            <option>白黒茶</option>
+                            <option>クリーム系</option>
+                            <option>グレー系</option>
+                            <option>まだら</option>
+                            <option>画像優先</option>
+                        </select>
+                    </div>
+                </div>
+
+                <h3>スタイル設定</h3>
+
+                <div class="grid-2">
+                    <div class="field">
+                        <label for="styleName">スタイル名</label>
+                        <select id="styleName">
+                            <option>未指定</option>
+                            <option>テディベアカット</option>
+                            <option selected>柴犬カット</option>
+                            <option>サマーカット</option>
+                            <option>マッシュルームカット</option>
+                            <option>ライオンカット</option>
+                            <option>ピーナッツカット</option>
+                            <option>アフロカット</option>
+                            <option>アシメカット</option>
+                            <option>イヤリングカット</option>
+                            <option>自由オーダー</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="styleSourceType">スタイルソース</label>
+                        <select id="styleSourceType">
+                            <option>catalog</option>
+                            <option>reference</option>
+                            <option>custom</option>
+                            <option selected>hybrid</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid-3">
+                    <div class="field">
+                        <label for="styleStrengthOverall">全体強度</label>
+                        <select id="styleStrengthOverall">
+                            <option>弱</option>
+                            <option selected>中</option>
+                            <option>強</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="headStyleStrength">頭部強度</label>
+                        <select id="headStyleStrength">
+                            <option>弱</option>
+                            <option selected>中</option>
+                            <option>強</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="bodyStyleStrength">胴体強度</label>
+                        <select id="bodyStyleStrength">
+                            <option>弱</option>
+                            <option selected>中</option>
+                            <option>強</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid-3">
+                    <div class="field">
+                        <label for="legStyleStrength">脚強度</label>
+                        <select id="legStyleStrength">
+                            <option>弱</option>
+                            <option selected>中</option>
+                            <option>強</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="earStyleStrength">耳強度</label>
+                        <select id="earStyleStrength">
+                            <option selected>弱</option>
+                            <option>中</option>
+                            <option>強</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="tailStyleStrength">尾強度</label>
+                        <select id="tailStyleStrength">
+                            <option selected>弱</option>
+                            <option>中</option>
+                            <option>強</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label>参考Aで採用したい要素</label>
+                    <div class="checkbox-group" id="refAFeatures">
+                        <label class="checkbox-chip"><input type="checkbox" value="頭頂の丸み" checked />頭頂の丸み</label>
+                        <label class="checkbox-chip"><input type="checkbox" value="頬の締まり" checked />頬の締まり</label>
+                        <label class="checkbox-chip"><input type="checkbox" value="顔の外周ライン" checked />顔の外周ライン</label>
+                        <label class="checkbox-chip"><input type="checkbox" value="耳まわりの見せ方" />耳まわりの見せ方</label>
+                        <label class="checkbox-chip"><input type="checkbox" value="マズルのふくらみ" />マズルのふくらみ</label>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label>参考Bで採用したい要素</label>
+                    <div class="checkbox-group" id="refBFeatures">
+                        <label class="checkbox-chip"><input type="checkbox" value="胴体の短さ" checked />胴体の短さ</label>
+                        <label class="checkbox-chip"><input type="checkbox" value="胴体の均一感" checked />胴体の均一感</label>
+                        <label class="checkbox-chip"><input type="checkbox" value="脚のすっきり感" checked />脚のすっきり感</label>
+                        <label class="checkbox-chip"><input type="checkbox" value="脚のボリューム感" />脚のボリューム感</label>
+                        <label class="checkbox-chip"><input type="checkbox" value="尾の仕上がり" />尾の仕上がり</label>
+                    </div>
+                </div>
+
+                <details>
+                    <summary>補足自由入力</summary>
+
+                    <div class="field">
+                        <label for="colorNote">毛色補足</label>
+                        <textarea id="colorNote"
+                            placeholder="例: 胸元の白を必ず残したい&#10;例: 左耳の茶色の面積感を維持&#10;例: 顔の中央に白いラインがある"></textarea>
+                    </div>
+
+                    <div class="field">
+                        <label for="distinctiveAnchorsNote">個体アンカー補足</label>
+                        <textarea id="distinctiveAnchorsNote"
+                            placeholder="例: 耳が外に大きく張る&#10;例: 鼻が小さく黒い&#10;例: 右目の上に茶色の差し色がある"></textarea>
+                    </div>
+
+                    <div class="field">
+                        <label for="customStyleNote">スタイル補足</label>
+                        <textarea id="customStyleNote"
+                            placeholder="例: かわいすぎず上品にしたい&#10;例: 顔は丸く、耳の飾り毛は少し残す&#10;例: 体は短めだが尾は自然に残す"></textarea>
+                    </div>
+
+                    <div class="field">
+                        <label for="specialConstraintsNote">制約補足</label>
+                        <textarea id="specialConstraintsNote"
+                            placeholder="例: 目の周りだけ特にすっきり&#10;例: 耳は短くしすぎない&#10;例: 首元は細く見せすぎない"></textarea>
+                    </div>
+
+                    <div class="field">
+                        <label for="prohibitChangesNote">変更禁止補足</label>
+                        <textarea id="prohibitChangesNote"
+                            placeholder="例: 耳の形そのものは変えない&#10;例: 胸元の白い毛の範囲を変えない&#10;例: 尻尾のボリュームをなくしすぎない"></textarea>
+                    </div>
+
+                    <div class="field">
+                        <label for="refAAdoptNote">参考A補足</label>
+                        <textarea id="refAAdoptNote"
+                            placeholder="例: 顔の丸みだけ参考にしたい&#10;例: 頬の締まり方を参考にしたい&#10;例: 耳の見せ方だけ使いたい"></textarea>
+                    </div>
+
+                    <div class="field">
+                        <label for="refBAdoptNote">参考B補足</label>
+                        <textarea id="refBAdoptNote"
+                            placeholder="例: 胴体の短さだけ参考にしたい&#10;例: 脚のすっきり感だけ採用&#10;例: 尾は参考にしない"></textarea>
+                    </div>
+                </details>
+
+                <details>
+                    <summary>詳細ロック設定</summary>
+
+                    <div class="grid-2">
+                        <div class="field">
+                            <label for="identityPreservationLevel">個体保持</label>
+                            <select id="identityPreservationLevel">
+                                <option>低</option>
+                                <option>中</option>
+                                <option>高</option>
+                                <option selected>最高</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label for="backgroundLock">背景固定</label>
+                            <select id="backgroundLock">
+                                <option>低</option>
+                                <option>中</option>
+                                <option>高</option>
+                                <option selected>最高</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid-2">
+                        <div class="field">
+                            <label for="poseLock">ポーズ固定</label>
+                            <select id="poseLock">
+                                <option>低</option>
+                                <option>中</option>
+                                <option>高</option>
+                                <option selected>最高</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label for="cameraLock">カメラ固定</label>
+                            <select id="cameraLock">
+                                <option>低</option>
+                                <option>中</option>
+                                <option>高</option>
+                                <option selected>最高</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid-2">
+                        <div class="field">
+                            <label for="colorLock">毛色固定</label>
+                            <select id="colorLock">
+                                <option>低</option>
+                                <option>中</option>
+                                <option>高</option>
+                                <option selected>最高</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label for="anatomyLock">骨格固定</label>
+                            <select id="anatomyLock">
+                                <option>低</option>
+                                <option>中</option>
+                                <option>高</option>
+                                <option selected>最高</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid-2">
+                        <div class="field">
+                            <label for="realismLevel">写実性要求</label>
+                            <select id="realismLevel">
+                                <option>低</option>
+                                <option>中</option>
+                                <option>高</option>
+                                <option selected>最高</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label for="editingMode">編集モード</label>
+                            <select id="editingMode">
+                                <option selected>保守的</option>
+                                <option>標準</option>
+                                <option>積極的</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid-3">
+                        <div class="field">
+                            <label for="conflictPolicyPreset">衝突方針</label>
+                            <select id="conflictPolicyPreset">
+                                <option>個体優先</option>
+                                <option>背景優先</option>
+                                <option>自然さ優先</option>
+                                <option>スタイル優先</option>
+                                <option selected>部位別バランス</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label for="localEditBias">局所編集バイアス</label>
+                            <select id="localEditBias">
+                                <option>低</option>
+                                <option>中</option>
+                                <option selected>高</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label for="styleSafetyBias">安全性バイアス</label>
+                            <select id="styleSafetyBias">
+                                <option selected>自然さ優先</option>
+                                <option>均衡</option>
+                                <option>スタイル再現優先</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label for="failurePreventionFocus">失敗予防フォーカス</label>
+                        <select id="failurePreventionFocus">
+                            <option selected>別犬化防止</option>
+                            <option>背景改変防止</option>
+                            <option>参考犬化防止</option>
+                            <option>耳変形防止</option>
+                            <option>CG感防止</option>
+                        </select>
+                    </div>
+                </details>
+
+                <div class="btn-row">
+                    <button type="button" class="secondary" id="fillSampleBtn">サンプル値を再入力</button>
+                    <button type="button" class="secondary" id="previewJsonBtn">JSON更新</button>
+                    <button type="submit" class="primary">生成する</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="panel">
+            <h2>プレビュー・結果</h2>
+
+            <div class="preview-grid">
+                <div class="img-card">
+                    <h4>Before画像</h4>
+                    <div class="img-box">
+                        <span class="empty-text">未選択</span>
+                        <img id="beforePreview" alt="Before preview" />
+                    </div>
+                </div>
+                <div class="img-card">
+                    <h4>参考画像A</h4>
+                    <div class="img-box">
+                        <span class="empty-text">未選択</span>
+                        <img id="refAPreview" alt="Ref A preview" />
+                    </div>
+                </div>
+                <div class="img-card">
+                    <h4>参考画像B</h4>
+                    <div class="img-box">
+                        <span class="empty-text">未選択</span>
+                        <img id="refBPreview" alt="Ref B preview" />
+                    </div>
+                </div>
+            </div>
+
+            <div id="statusBox" class="status">待機中です。</div>
+
+            <div class="output-box">
+                <h3>構造化リクエスト JSON</h3>
+                <pre id="requestPreview">{}</pre>
+            </div>
+
+            <div class="output-box">
+                <h3>生成画像</h3>
+                <img id="resultImage" class="output-image" alt="生成結果" />
+                <div id="resultMeta" class="small" style="margin-top:10px;">まだ結果はありません。</div>
+            </div>
+
+            <div class="output-box">
+                <h3>採用計画・評価</h3>
+                <div id="resultBadges"></div>
+                <pre id="resultJson">まだ結果はありません。</pre>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_ENDPOINT = "http://localhost:3001/generate";
+
+        function getCheckedValues(groupId) {
+            return Array.from(document.querySelectorAll(`#${groupId} input[type="checkbox"]:checked`)).map(el => el.value);
+        }
+
+        function setStatus(message, type = "") {
+            const box = document.getElementById("statusBox");
+            box.className = "status" + (type ? ` ${type}` : "");
+            box.textContent = message;
+        }
+
+        function previewImage(fileInputId, imgId) {
+            const input = document.getElementById(fileInputId);
+            const img = document.getElementById(imgId);
+            const emptyText = img.parentElement.querySelector(".empty-text");
+            const file = input.files?.[0];
+
+            if (!file) {
+                img.style.display = "none";
+                img.removeAttribute("src");
+                if (emptyText) emptyText.style.display = "block";
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                img.src = e.target.result;
+                img.style.display = "block";
+                if (emptyText) emptyText.style.display = "none";
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function collectRequestJson() {
+            return {
+                breedPrimary: document.getElementById("breedPrimary").value.trim(),
+                breedSecondary: document.getElementById("breedSecondary").value.trim(),
+                sizeClass: document.getElementById("sizeClass").value,
+                ageStage: document.getElementById("ageStage").value,
+                coatLength: document.getElementById("coatLength").value,
+                coatVolume: document.getElementById("coatVolume").value,
+                coatTexture: document.getElementById("coatTexture").value,
+                earType: document.getElementById("earType").value,
+                tailType: document.getElementById("tailType").value,
+                bodyBuild: document.getElementById("bodyBuild").value,
+                colorPattern: document.getElementById("colorPattern").value,
+
+                colorNote: document.getElementById("colorNote").value.trim(),
+                distinctiveAnchorsNote: document.getElementById("distinctiveAnchorsNote").value.trim(),
+
+                styleName: document.getElementById("styleName").value,
+                styleSourceType: document.getElementById("styleSourceType").value,
+
+                styleStrengthOverall: document.getElementById("styleStrengthOverall").value,
+                headStyleStrength: document.getElementById("headStyleStrength").value,
+                bodyStyleStrength: document.getElementById("bodyStyleStrength").value,
+                legStyleStrength: document.getElementById("legStyleStrength").value,
+                earStyleStrength: document.getElementById("earStyleStrength").value,
+                tailStyleStrength: document.getElementById("tailStyleStrength").value,
+
+                customStyleNote: document.getElementById("customStyleNote").value.trim(),
+                specialConstraintsNote: document.getElementById("specialConstraintsNote").value.trim(),
+                prohibitChangesNote: document.getElementById("prohibitChangesNote").value.trim(),
+
+                refAAdoptFeatures: getCheckedValues("refAFeatures"),
+                refBAdoptFeatures: getCheckedValues("refBFeatures"),
+                refAAdoptNote: document.getElementById("refAAdoptNote").value.trim(),
+                refBAdoptNote: document.getElementById("refBAdoptNote").value.trim(),
+
+                identityPreservationLevel: document.getElementById("identityPreservationLevel").value,
+                backgroundLock: document.getElementById("backgroundLock").value,
+                poseLock: document.getElementById("poseLock").value,
+                cameraLock: document.getElementById("cameraLock").value,
+                colorLock: document.getElementById("colorLock").value,
+                anatomyLock: document.getElementById("anatomyLock").value,
+                realismLevel: document.getElementById("realismLevel").value,
+
+                editingMode: document.getElementById("editingMode").value,
+                conflictPolicyPreset: document.getElementById("conflictPolicyPreset").value,
+                localEditBias: document.getElementById("localEditBias").value,
+                styleSafetyBias: document.getElementById("styleSafetyBias").value,
+                failurePreventionFocus: document.getElementById("failurePreventionFocus").value
+            };
+        }
+
+        function refreshRequestPreview() {
+            const json = collectRequestJson();
+            document.getElementById("requestPreview").textContent = JSON.stringify(json, null, 2);
+            return json;
+        }
+
+        function applyStyleDefaults() {
+            const styleName = document.getElementById("styleName").value;
+            const defaults = styleDefaults[styleName];
+            if (!defaults) {
+                // 未指定や自由オーダーの場合はノートをクリアしない（ユーザー入力を尊重）
+                return;
+            }
+
+            document.getElementById("styleStrengthOverall").value = defaults.styleStrengthOverall;
+            document.getElementById("headStyleStrength").value = defaults.headStyleStrength;
+            document.getElementById("bodyStyleStrength").value = defaults.bodyStyleStrength;
+            document.getElementById("legStyleStrength").value = defaults.legStyleStrength;
+            document.getElementById("earStyleStrength").value = defaults.earStyleStrength;
+            document.getElementById("tailStyleStrength").value = defaults.tailStyleStrength;
+
+            // スタイル補足（カット内容）を自動入力
+            if (defaults.styleNote) {
+                document.getElementById("customStyleNote").value = defaults.styleNote;
+            }
+
+            refreshRequestPreview();
+        }
+
+        function fillSampleValues() {
+            document.getElementById("breedPrimary").value = "";
+            document.getElementById("breedSecondary").value = "";
+            document.getElementById("sizeClass").value = "";
+            document.getElementById("ageStage").value = "";
+            document.getElementById("coatLength").value = "";
+            document.getElementById("coatVolume").value = "";
+            document.getElementById("coatTexture").value = "";
+            document.getElementById("earType").value = "";
+            document.getElementById("tailType").value = "";
+            document.getElementById("bodyBuild").value = "";
+            document.getElementById("colorPattern").value = "";
+
+            document.getElementById("styleName").value = "";
+            document.getElementById("styleSourceType").value = "hybrid";
+
+            document.getElementById("colorNote").value = "";
+            document.getElementById("distinctiveAnchorsNote").value = "";
+            document.getElementById("customStyleNote").value = "";
+            document.getElementById("specialConstraintsNote").value = "";
+            document.getElementById("prohibitChangesNote").value = "";
+            document.getElementById("refAAdoptNote").value = "";
+            document.getElementById("refBAdoptNote").value = "";
+
+            document.querySelectorAll("#refAFeatures input[type='checkbox']").forEach(cb => {
+                cb.checked = ["頭頂の丸み", "頬の締まり", "顔の外周ライン"].includes(cb.value);
+            });
+
+            document.querySelectorAll("#refBFeatures input[type='checkbox']").forEach(cb => {
+                cb.checked = ["胴体の短さ", "胴体の均一感", "脚のすっきり感"].includes(cb.value);
+            });
+
+            document.getElementById("identityPreservationLevel").value = "最高";
+            document.getElementById("backgroundLock").value = "最高";
+            document.getElementById("poseLock").value = "最高";
+            document.getElementById("cameraLock").value = "最高";
+            document.getElementById("colorLock").value = "最高";
+            document.getElementById("anatomyLock").value = "最高";
+            document.getElementById("realismLevel").value = "最高";
+
+            document.getElementById("editingMode").value = "保守的";
+            document.getElementById("conflictPolicyPreset").value = "部位別バランス";
+            document.getElementById("localEditBias").value = "高";
+            document.getElementById("styleSafetyBias").value = "自然さ優先";
+            document.getElementById("failurePreventionFocus").value = "別犬化防止";
+
+            applyStyleDefaults();
+            refreshRequestPreview();
+        }
+
+        async function analyzeDog() {
+            const beforeFile = document.getElementById("beforeImage").files?.[0];
+            if (!beforeFile) {
+                setStatus("Before画像を選択してください。", "error");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append("beforeImage", beforeFile);
+
+            setStatus("AIで画像を解析中...", "loading");
+
+            try {
+                const response = await fetch("http://localhost:3001/analyze", {
+                    method: "POST",
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error("解析に失敗しました。");
+                }
+
+                const result = await response.json();
+                if (result.ok && result.result) {
+                    const data = result.result;
+                    if (data.breedPrimary) document.getElementById("breedPrimary").value = data.breedPrimary;
+                    if (data.breedSecondary) document.getElementById("breedSecondary").value = data.breedSecondary;
+                    if (data.sizeClass) document.getElementById("sizeClass").value = data.sizeClass;
+                    if (data.ageStage) document.getElementById("ageStage").value = data.ageStage;
+                    if (data.coatLength) document.getElementById("coatLength").value = data.coatLength;
+                    if (data.coatVolume) document.getElementById("coatVolume").value = data.coatVolume;
+                    if (data.coatTexture) document.getElementById("coatTexture").value = data.coatTexture;
+                    if (data.earType) document.getElementById("earType").value = data.earType;
+                    if (data.tailType) document.getElementById("tailType").value = data.tailType;
+                    if (data.bodyBuild) document.getElementById("bodyBuild").value = data.bodyBuild;
+                    if (data.colorPattern) document.getElementById("colorPattern").value = data.colorPattern;
+                    if (data.styleName) document.getElementById("styleName").value = data.styleName;
+                    if (data.colorNote) document.getElementById("colorNote").value = data.colorNote;
+                    if (data.distinctiveAnchorsNote) document.getElementById("distinctiveAnchorsNote").value = data.distinctiveAnchorsNote;
+
+                    applyStyleDefaults();
+                    refreshRequestPreview();
+                    setStatus("AI解析による自動入力が完了しました。", "success");
+                }
+            } catch (error) {
+                console.error(error);
+                setStatus("解析エラー: " + error.message, "error");
+            }
+        }
+
+        async function submitForm(event) {
+            event.preventDefault();
+
+            const beforeFile = document.getElementById("beforeImage").files?.[0];
+            const refAFile = document.getElementById("refImageA").files?.[0];
+            const refBFile = document.getElementById("refImageB").files?.[0];
+
+            if (!beforeFile || !refAFile || !refBFile) {
+                setStatus("Before画像・参考画像A・参考画像B をすべて選択してください。", "error");
+                return;
+            }
+
+            const requestJson = collectRequestJson();
+            document.getElementById("requestPreview").textContent = JSON.stringify(requestJson, null, 2);
+
+            const formData = new FormData();
+            formData.append("beforeImage", beforeFile);
+            formData.append("refImageA", refAFile);
+            formData.append("refImageB", refBFile);
+            formData.append("requestJson", JSON.stringify(requestJson));
+
+            setStatus("生成中です。少し時間がかかる場合があります...", "loading");
+            document.getElementById("resultJson").textContent = "生成中...";
+            document.getElementById("resultMeta").textContent = "生成中...";
+            document.getElementById("resultBadges").innerHTML = "";
+            document.getElementById("resultImage").removeAttribute("src");
+
+            try {
+                const response = await fetch(API_ENDPOINT, {
+                    method: "POST",
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(errorText || "APIエラー");
+                }
+
+                const result = await response.json();
+
+                if (result.imageBase64) {
+                    document.getElementById("resultImage").src = `data:image/png;base64,${result.imageBase64}`;
+                }
+
+                const badges = [];
+                if (result.selectedPlanId) badges.push(`<span class="badge">採用計画: ${result.selectedPlanId}</span>`);
+                if (result.review?.reason) badges.push(`<span class="badge">選定理由あり</span>`);
+                if (result.postCheck) badges.push(`<span class="badge">自動評価あり</span>`);
+                document.getElementById("resultBadges").innerHTML = badges.join("");
+
+                document.getElementById("resultMeta").textContent =
+                    result.review?.reason || "生成完了";
+
+                document.getElementById("resultJson").textContent = JSON.stringify(result, null, 2);
+
+                setStatus("生成が完了しました。", "success");
+            } catch (error) {
+                console.error(error);
+                let msg = `エラー: ${error.message}`;
+                if (window.location.protocol === 'file:') {
+                    msg += "\n\n【重要】ファイルを直接開いているため通信がブロックされています。 http://localhost:3001/index.html からアクセスしてください。";
+                }
+                setStatus(msg, "error");
+                document.getElementById("resultJson").textContent = String(error.stack || error.message || error);
+            }
+        }
+
+        document.getElementById("beforeImage").addEventListener("change", () => previewImage("beforeImage", "beforePreview"));
+        document.getElementById("refImageA").addEventListener("change", () => previewImage("refImageA", "refAPreview"));
+        document.getElementById("refImageB").addEventListener("change", () => previewImage("refImageB", "refBPreview"));
+
+        document.getElementById("styleName").addEventListener("change", applyStyleDefaults);
+        document.getElementById("analyzeDogBtn").addEventListener("click", analyzeDog);
+        document.getElementById("previewJsonBtn").addEventListener("click", refreshRequestPreview);
+        document.getElementById("fillSampleBtn").addEventListener("click", fillSampleValues);
+        document.getElementById("groomingForm").addEventListener("submit", submitForm);
+
+        document.querySelectorAll("input, select, textarea").forEach(el => {
+            el.addEventListener("change", refreshRequestPreview);
+            el.addEventListener("input", refreshRequestPreview);
+        });
+
+        fillSampleValues();
+        refreshRequestPreview();
+    </script>
+</body>
+
+</html>
