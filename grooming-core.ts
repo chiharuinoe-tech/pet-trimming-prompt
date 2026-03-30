@@ -7,7 +7,7 @@ const TEXT_MODEL_NAME = process.env.GEMINI_TEXT_MODEL ?? "gemini-3.1-flash-lite-
 const IMAGE_MODEL_NAME = process.env.GEMINI_IMAGE_MODEL ?? "gemini-3.1-flash-image-preview";
 
 if (!API_KEY) {
-    throw new Error("GEMINI_API_KEY が未設定です。");
+    throw new Error("GEMINI_API_KEY を設定してください。");
 }
 
 const genAI = new GoogleGenerativeAI(API_KEY);
