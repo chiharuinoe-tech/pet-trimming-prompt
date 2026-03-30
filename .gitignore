@@ -1,0 +1,37 @@
+# --- Dependency directories (ライブラリ本体：重いので除外) ---
+node_modules/
+jspm_packages/
+
+# --- TypeScript / Build output (コンパイル後の成果物) ---
+lib/
+temp/
+dist/
+out/
+build/
+tsbuildinfo/
+*.tsbuildinfo
+
+# --- Debug logs (ログファイル) ---
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# --- Environmental variables (環境変数：機密情報を含むため除外) ---
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# --- OS / Editor (OSやエディタ固有の設定) ---
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+outputs/
