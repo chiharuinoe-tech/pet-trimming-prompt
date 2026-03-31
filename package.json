@@ -3,11 +3,12 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "tsx watch server.ts"
+    "dev": "taskkill /F /FI \"PID gt 0\" /FI \"TCPPORT eq 3002\" /T 2>nul & tsx watch --env-file=.env server.ts"
   },
   "dependencies": {
     "@google/generative-ai": "^0.21.0",
     "cors": "^2.8.5",
+    "dotenv": "^17.3.1",
     "express": "^4.21.2",
     "multer": "^1.4.5-lts.1"
   },

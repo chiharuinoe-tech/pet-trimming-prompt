@@ -7,13 +7,15 @@ import { fileURLToPath } from "url";
 import {
     generateGroomingPreview,
     analyzeDogImage,
-    type GroomingRequest
+    type GroomingRequest,
+    UI_OPTIONS,
+    STYLE_PRESETS
 } from "./grooming-core.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const PORT = Number(process.env.PORT ?? 3001);
+const PORT = Number(process.env.PORT ?? 3002);
 const PUBLIC_DIR = fs.existsSync(path.join(__dirname, "public"))
     ? path.join(__dirname, "public")
     : __dirname;
@@ -46,14 +48,6 @@ function parseRequestJson(raw: unknown): GroomingRequest {
         parsed.breedPrimary = "未指定";
     }
 
-    if (!Array.isArray(parsed.refAAdoptFeatures)) {
-        parsed.refAAdoptFeatures = [];
-    }
-
-    if (!Array.isArray(parsed.refBAdoptFeatures)) {
-        parsed.refBAdoptFeatures = [];
-    }
-
     return parsed;
 }
 
@@ -75,6 +69,18 @@ app.get("/health", (_req: Request, res: Response) => {
     res.json({
         ok: true,
         service: "grooming-preview-api"
+    });
+});
+
+app.get("/api/presets", (_req: Request, res: Response) => {
+    const presets = UI_OPTIONS.styleName.reduce((acc: any, name: string) => {
+        acc[name] = STYLE_PRESETS[name as keyof typeof STYLE_PRESETS] || STYLE_PRESETS["未指定"];
+        return acc;
+    }, {});
+
+    res.json({
+        ok: true,
+        presets
     });
 });
 
@@ -143,15 +149,12 @@ app.post(
 
             res.json({
                 ok: true,
-                imageBase64: result.imageBase64,
+                results: result.results,
                 inferred: result.inferred,
                 planPack: result.planPack,
-                review: result.review,
                 selectedPlanId: result.selectedPlanId,
                 selectedPlan: result.selectedPlan,
-                postCheck: result.postCheck,
-                prompt: result.prompt,
-                debugId: result.debugId
+                prompt: result.prompt
             });
         } catch (error: any) {
             console.error("🔥 /generate error:", error);
